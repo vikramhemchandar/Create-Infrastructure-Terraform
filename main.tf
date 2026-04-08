@@ -12,3 +12,21 @@ module "vpc" {
 
   common_tags = var.common_tags
 }
+
+module "eks-cluster"{
+    source = "./modules/EKS/cluster"
+    eks_cluster_name = var.cluster_name
+    iam_role = module.cluster-iam-role.output.iam_role_arn
+    subnet_id = module.subnet1.subnet_id
+}
+
+module "cluster-iam-role"{
+    source = "./modules/EKS/iam_role"
+    iam_role_name = var.iam_role_name
+}
+
+module "policy-attachment"{
+    source = "./modules/EKS/policy_attachment"
+    policy_arn = var.policy_arn
+    iam_role = module.cluster-iam-role.output.iam_role_name
+}
