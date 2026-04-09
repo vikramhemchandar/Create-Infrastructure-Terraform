@@ -13,3 +13,10 @@ common_tags = {
   ManagedBy   = "Terraform"
   Owner       = "Vikram Hem Chandar"
 }
+
+# EC2 Variables
+#aws_region    = "us-west-1"
+instance_type = "t3.medium"
+key_name      = "yunus-key"
+ami_id        = "ami-05d2d839d4f73aafb"  # Amazon Ubuntu (example)
+

@@ -46,3 +46,14 @@ module "eks-irsa" {
   service_account_name = var.service_account_name
   bucket_name = module
 }
+
+module "ec2" {
+  source = "./modules/ec2"
+
+  aws_region    = var.aws_region
+  instance_type = var.instance_type
+  key_name      = var.key_name
+  ami_id        = var.ami_id
+  vpc_id        = module.vpc.vpc_id
+  public_subnet_id = module.vpc.public_subnet_id
+}
