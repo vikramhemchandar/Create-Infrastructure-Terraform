@@ -16,17 +16,33 @@ module "vpc" {
 module "eks-cluster"{
     source = "./modules/EKS/cluster"
     eks_cluster_name = var.cluster_name
-    iam_role = module.cluster-iam-role.output.iam_role_arn
-    subnet_id = module.subnet1.subnet_id
+    iam_role_arn = module.cluster-iam-role.output.iam_role_arn
+    subnet_id = module.vpc.private_subnet_id
 }
 
 module "cluster-iam-role"{
-    source = "./modules/EKS/iam_role"
+    source = "./modules/EKS/cluster_iam_role"
     iam_role_name = var.iam_role_name
 }
 
-module "policy-attachment"{
-    source = "./modules/EKS/policy_attachment"
-    policy_arn = var.policy_arn
-    iam_role = module.cluster-iam-role.output.iam_role_name
+module "eks-node-group-iam-role" {
+  source = "./modules/EKS/node_iam_role"
+  nodegroup_iam_role = var.nodegroup_iam_role
+}
+
+module "eks-node-group" {
+  source = "./modules/EKS/node_group"
+  cluster_name = module.eks-cluster.eks_cluster_name
+  node_group_name = var.eks_node_group_name
+  iam_role_arn = module.eks-node-group-iam-role.output.nodegroup_iam_arn
+  subnet_ids = var.private_subnet_cidr
+}
+
+module "eks-irsa" {
+  source = "./modules/EKS/IRSA"
+  oidc_issuer_url = module.eks-cluster.output.eks_oidc_issuer_url
+  irsa_role_name = var.irsa_role_name
+  namespace = var.namespace
+  service_account_name = var.service_account_name
+  bucket_name = module
 }

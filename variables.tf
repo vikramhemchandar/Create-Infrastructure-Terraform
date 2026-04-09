@@ -37,3 +37,33 @@ variable "common_tags" {
   description = "Common tags applied to all resources"
   type        = map(string)
 }
+
+variable "cluster_name"{
+    type = string
+}
+
+variable "iam_role_name"{
+    type = string
+}
+
+
+variable "eks_node_group_name" {
+    type = string
+}
+
+variable "nodegroup_iam_role" {
+    type = string
+}
+
+variable "irsa_role_name" {
+    type = string
+}
+
+variable "namespace" {
+    type = string
+}
+
+variable "service_account_name" {
+    type = string
+}
+

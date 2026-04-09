@@ -5,7 +5,7 @@ resource "aws_eks_cluster" "jhakkas-cluster" {
     authentication_mode = "API"
   }
 
-  role_arn = var.iam_role
+  role_arn = var.iam_role_arn
   version  = "1.34"
 
   vpc_config {
