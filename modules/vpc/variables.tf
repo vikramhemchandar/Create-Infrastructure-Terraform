@@ -4,10 +4,10 @@ variable "aws_region" {
   default     = "ap-south-1" # Mumbai — closest to Hyderabad
 }
 
-variable "aws_profile" {
-  description = "AWS profile to be used"
-  type        = string
-}
+# variable "aws_profile" {
+#   description = "AWS profile to be used"
+#   type        = string
+# }
 
 variable "project_name" {
   description = "Prefix used for all resource names"

@@ -3,10 +3,10 @@ variable "aws_region" {
   type        = string
 }
 
-variable "aws_profile" {
-  description = "AWS profile to be used"
-  type        = string
-}
+# variable "aws_profile" {
+#   description = "AWS profile to be used"
+#   type        = string
+# }
 
 variable "project_name" {
   description = "Project name used for all resource names"
@@ -81,4 +81,9 @@ variable "key_name" {
 variable "ami_id" {
   description = "AMI ID for EC2"
   type        = string
+}
+
+variable "bucket_name" {
+  description = "S3 bucket name"
+  type = string
 }

@@ -2,7 +2,7 @@ module "vpc" {
   source = "./modules/vpc"
 
   aws_region  = var.aws_region
-  aws_profile = var.aws_profile
+  #aws_profile = var.aws_profile
 
   project_name        = var.project_name
   vpc_cidr            = var.vpc_cidr
@@ -44,7 +44,7 @@ module "eks-irsa" {
   irsa_role_name = var.irsa_role_name
   namespace = var.namespace
   service_account_name = var.service_account_name
-  bucket_name = module
+  bucket_name = module.s3-bucket.bucket_arn
 }
 
 module "ec2" {
@@ -56,4 +56,11 @@ module "ec2" {
   ami_id        = var.ami_id
   vpc_id        = module.vpc.vpc_id
   public_subnet_id = module.vpc.public_subnet_id
+}
+
+module "s3-bucket" {
+  source = "./modules/s3-bucket"
+
+  bucket_name     = var.bucket_name
+  vpc_endpoint_id = module.vpc.s3_endpoint_id
 }
