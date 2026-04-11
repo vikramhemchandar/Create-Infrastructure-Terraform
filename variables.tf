@@ -28,8 +28,18 @@ variable "private_subnet_cidr" {
   type        = string
 }
 
+variable "private_subnet_cidr2" {
+  description = "CIDR block for the private subnet 2"
+  type        = string
+}
+
 variable "availability_zone" {
   description = "Availability zone for both subnets"
+  type        = string
+}
+
+variable "availability_zone2" {
+  description = "Availability zone 2 for 2nd private subnet"
   type        = string
 }
 
@@ -38,73 +48,73 @@ variable "common_tags" {
   type        = map(string)
 }
 
-variable "cluster_name"{
-    type = string
+variable "cluster_name" {
+  type = string
 }
 
 variable "irsa_role_name" {
-    type = string
+  type = string
 }
 
 variable "namespace" {
-    type = string
+  type = string
 }
 
 variable "irsa_service_account_name" {
-    type = string
-}
-variable "enable_auto_mode"{
-  type = bool
-}
-variable "authentication_mode"{
   type = string
 }
-variable "cluster_version"{
+variable "enable_auto_mode" {
+  type = bool
+}
+variable "authentication_mode" {
   type = string
 }
-variable "enable_private_access"{
+variable "cluster_version" {
+  type = string
+}
+variable "enable_private_access" {
   type = bool
 }
-variable "enable_public_access"{
+variable "enable_public_access" {
   type = bool
 }
-variable "cluster_endpoint_public_access_cidrs"{
+variable "cluster_endpoint_public_access_cidrs" {
   type = list(string)
-} 
-variable "nodegroup_iam_arn"{
+}
+# variable "nodegroup_iam_arn" {
+#   type = string
+# }
+variable "kms_key_arn" {
   type = string
 }
-variable "kms_key_arn"{
+# variable "create_iam_roles" {
+#   type = bool
+# }
+# variable "create_node_role" {
+#   type = bool
+# }
+variable "nodegroup_desired_size" {
+  type = number
+}
+variable "nodegroup_max_size" {
+  type = number
+}
+variable "nodegroup_min_size" {
+  type = number
+}
+variable "node_group_instance_types" {
+  type = list(string)
+}
+variable "node_group_capacity_type" {
   type = string
 }
-variable "create_iam_roles"{
-  type = bool
-}
-variable "create_node_role"{
-  type = bool
-}
-variable "nodegroup_desired_size"{
-    type = number
-}
-variable "nodegroup_max_size"{
-    type = number
-}
-variable "nodegroup_min_size"{
-    type = number
-}
-variable "node_group_instance_types"{
-    type = list(string)
-}
-variable "node_group_capacity_type"{
-    type = string
-}
-variable "node_group_disk_size"{
-    type = string
+variable "node_group_disk_size" {
+  type = number
 }
 
-variable "enable_auto_mode" {
-    type = bool
-}
+# variable "enable_auto_mode" {
+#   type = bool
+# }
 variable "enable_iam_access_entries" {
   description = "Enable IAM access entries for EKS cluster. Only works with API or API_AND_CONFIG_MAP authentication mode."
   type        = bool
@@ -182,6 +192,6 @@ variable "create_standard_access_entries" {
   default     = true
 }
 
-variable "bucket_name"{
+variable "bucket_name" {
   type = string
 }

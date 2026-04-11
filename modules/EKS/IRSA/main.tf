@@ -4,8 +4,8 @@ data "tls_certificate" "eks" {
 
 #OIDC Provider Creation (This is required even when auto mode is on while creating cluster)
 resource "aws_iam_openid_connect_provider" "default" {
-  url = var.oidc_issuer_url
-  client_id_list = ["sts.amazonaws.com"]
+  url             = var.oidc_issuer_url
+  client_id_list  = ["sts.amazonaws.com"]
   thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
 }
 
@@ -23,9 +23,9 @@ resource "aws_iam_role" "irsa_role" {
       Action = "sts:AssumeRoleWithWebIdentity",
       Condition = {
         StringEquals = {
-            "${aws_iam_openid_connect_provider.default.url}:sub" = "system:serviceaccount:${var.namespace}:${var.irsa_service_account_name}"
-            "${aws_iam_openid_connect_provider.default.url}:aud" = "sts.amazonaws.com"
-          }
+          "${aws_iam_openid_connect_provider.default.url}:sub" = "system:serviceaccount:${var.namespace}:${var.irsa_service_account_name}"
+          "${aws_iam_openid_connect_provider.default.url}:aud" = "sts.amazonaws.com"
+        }
       }
     }]
   })
@@ -76,7 +76,7 @@ resource "aws_iam_role_policy_attachment" "irsa_attach" {
 #EBS CSI IAM ROLE (Not required when using auto mode for node group creation)
 resource "aws_iam_role" "ebs_iam_role" {
   count = var.enable_auto_mode ? 0 : 1
-  name = "${var.cluster_name}-ebs-iam-role"
+  name  = "${var.cluster_name}-ebs-iam-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -88,8 +88,8 @@ resource "aws_iam_role" "ebs_iam_role" {
       Action = "sts:AssumeRoleWithWebIdentity",
       Condition = {
         StringEquals = {
-            "${aws_iam_openid_connect_provider.default.url}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
-          }
+          "${aws_iam_openid_connect_provider.default.url}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+        }
       }
     }]
   })
@@ -97,7 +97,7 @@ resource "aws_iam_role" "ebs_iam_role" {
 
 resource "aws_iam_role_policy_attachment" "ebs_csi" {
   count      = var.enable_auto_mode ? 0 : 1
-  role       = aws_iam_role.ebs_csi[0].name
+  role       = aws_iam_role.ebs_iam_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
 

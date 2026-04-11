@@ -49,6 +49,19 @@ resource "aws_subnet" "private" {
   })
 }
 
+# Private Subnet2
+
+resource "aws_subnet" "private2" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = var.private_subnet_cidr2
+  availability_zone = var.availability_zone2
+
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-private-subnet2"
+    Tier = "Private"
+  })
+}
+
 # Elastic IP + NAT Gateway (for Private Subnet outbound)
 
 resource "aws_eip" "nat" {
@@ -110,6 +123,25 @@ resource "aws_route_table" "private" {
 resource "aws_route_table_association" "private" {
   subnet_id      = aws_subnet.private.id
   route_table_id = aws_route_table.private.id
+}
+
+# --- Private Route Table 2 ---
+resource "aws_route_table" "private2" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat.id
+  }
+
+  tags = merge(var.common_tags, {
+    Name = "${var.project_name}-private-rt2"
+  })
+}
+
+resource "aws_route_table_association" "private2" {
+  subnet_id      = aws_subnet.private2.id
+  route_table_id = aws_route_table.private2.id
 }
 
 # S3 Gateway VPC Endpoint
