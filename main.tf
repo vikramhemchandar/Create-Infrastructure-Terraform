@@ -16,26 +16,42 @@ module "vpc" {
 module "eks-cluster"{
     source = "./modules/EKS/cluster"
     eks_cluster_name = var.cluster_name
+    enable_auto_mode = var.enable_auto_mode
+    authentication_mode = var.authentication_mode
     iam_role_arn = module.cluster-iam-role.output.iam_role_arn
     subnet_id = module.vpc.private_subnet_id
+    cluster_version = var.cluster_version
+    enable_private_access = var.enable_private_access
+    enable_public_access = var.enable_public_access
+    cluster_endpoint_public_access_cidrs = var.cluster_endpoint_public_access_cidrs
+    nodegroup_iam_arn = module.eks-node-group-iam-role.output.nodegroup_iam_arn
+    kms_key_arn = var.kms_key_arn
+
 }
 
 module "cluster-iam-role"{
     source = "./modules/EKS/cluster_iam_role"
-    iam_role_name = var.iam_role_name
+    cluster_name = var.cluster_name
 }
 
 module "eks-node-group-iam-role" {
   source = "./modules/EKS/node_iam_role"
-  nodegroup_iam_role = var.nodegroup_iam_role
+  cluster_name = var.cluster_name
 }
 
 module "eks-node-group" {
   source = "./modules/EKS/node_group"
-  cluster_name = module.eks-cluster.eks_cluster_name
-  node_group_name = var.eks_node_group_name
+  enable_auto_mode = var.enable_auto_mode
+  cluster_name = var.cluster_name
   iam_role_arn = module.eks-node-group-iam-role.output.nodegroup_iam_arn
-  subnet_ids = var.private_subnet_cidr
+  subnet_ids = module.vpc.private_subnet_id
+  nodegroup_desired_size = var.nodegroup_desired_size
+  nodegroup_max_size = var.nodegroup_max_size
+  nodegroup_min_size = var.nodegroup_min_size
+  node_group_instance_types = var.node_group_instance_types
+  node_group_capacity_type = var.node_group_capacity_type
+  node_group_disk_size = var.node_group_disk_size
+
 }
 
 module "eks-irsa" {
@@ -43,6 +59,32 @@ module "eks-irsa" {
   oidc_issuer_url = module.eks-cluster.output.eks_oidc_issuer_url
   irsa_role_name = var.irsa_role_name
   namespace = var.namespace
-  service_account_name = var.service_account_name
+  irsa_service_account_name = var.irsa_service_account_name
   bucket_name = module
+  cluster_name = var.cluster_name
+  enable_auto_mode = var.enable_auto_mode
+
 }
+
+module "eks-addons" {
+  source = "./modules/EKS/addons"
+  enable_auto_mode = var.enable_auto_mode
+  cluster_name = var.cluster_name
+  ebs_sa_role_arn = module.eks-irsa.output.ebs_csi_arn
+  ebs_csi_policy_attachment = module.eks-irsa.output.ebs_csi_policy_attachment
+
+}
+
+module "eks_access_entries" {
+  source = "./modules/EKS/eks-access-entries"
+  enable_iam_access_entries = var.enable_iam_access_entries
+  create_standard_access_entries = var.create_standard_access_entries
+  enable_auto_mode = var.enable_auto_mode
+  access_entries = var.access_entries
+  cluster_name = var.cluster_name
+  access_entry_policy_associations = var.access_entry_policy_associations
+  node_role_arn = module.eks-node-group-iam-role.output.nodegroup_iam_arn
+}
+
+
+

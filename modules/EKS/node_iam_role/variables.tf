@@ -1,3 +1,4 @@
-variable "nodegroup_iam_role" {
+variable "cluster_name" {
     type = string
+    description = "Name of the EKS Cluster"
 }

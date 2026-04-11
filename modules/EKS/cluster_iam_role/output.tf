@@ -4,5 +4,5 @@ output "iam_role_arn"{
 }
 output "iam_role_name"{
     value = aws_iam_role.cluster_iam_role.name
-    description = "Cluster IAM ARN"
+    description = "Cluster IAM NAME"
 }

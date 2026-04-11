@@ -9,9 +9,15 @@ variable "irsa_role_name" {
 variable "namespace" {
     type = string
 }
-variable "service_account_name"{
+variable "irsa_service_account_name"{
     type = string
 }
 variable "bucket_name"{
     type = string
+}
+variable "cluster_name"{
+    type = string
+}
+variable "enable_auto_mode" {
+    type = bool
 }
