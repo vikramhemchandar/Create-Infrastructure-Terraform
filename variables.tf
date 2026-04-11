@@ -42,19 +42,6 @@ variable "cluster_name"{
     type = string
 }
 
-variable "iam_role_name"{
-    type = string
-}
-
-
-variable "eks_node_group_name" {
-    type = string
-}
-
-variable "nodegroup_iam_role" {
-    type = string
-}
-
 variable "irsa_role_name" {
     type = string
 }
@@ -97,13 +84,13 @@ variable "create_node_role"{
   type = bool
 }
 variable "nodegroup_desired_size"{
-    type = string
+    type = number
 }
 variable "nodegroup_max_size"{
-    type = string
+    type = number
 }
 variable "nodegroup_min_size"{
-    type = string
+    type = number
 }
 variable "node_group_instance_types"{
     type = list(string)
@@ -195,3 +182,6 @@ variable "create_standard_access_entries" {
   default     = true
 }
 
+variable "bucket_name"{
+  type = string
+}

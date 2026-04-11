@@ -60,7 +60,7 @@ module "eks-irsa" {
   irsa_role_name = var.irsa_role_name
   namespace = var.namespace
   irsa_service_account_name = var.irsa_service_account_name
-  bucket_name = module
+  bucket_name = var.bucket_name
   cluster_name = var.cluster_name
   enable_auto_mode = var.enable_auto_mode
 
