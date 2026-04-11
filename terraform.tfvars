@@ -34,7 +34,28 @@ node_group_disk_size                 = 20
 irsa_role_name                       = "custom-sa-irsa-role"
 namespace                            = "default"
 irsa_service_account_name            = "custom-sa-account"
-bucket_name                          = "anasuya-s3-bucket"
+bucket_name                          = "jhakkas-s3-bucket"
 enable_iam_access_entries            = true
 create_standard_access_entries       = true
 
+# access_entries = {
+#   "arn:aws:iam::975050024946:user/vikramhemchandar@gmail.com" = {
+#     kubernetes_groups = ["system:masters"]
+#     type              = "STANDARD"
+#   }
+
+#   "arn:aws:iam::975050024946:role/dev-role" = {
+#     kubernetes_groups = ["developers"]
+#   }
+# }
+
+# access_entry_policy_associations = {
+#   "admin-access" = {
+#     principal_arn = "arn:aws:iam::975050024946:user/vikramhemchandar@gmail.com"
+#     policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+#     access_scope = {
+#       type = "cluster"
+#     }
+#   }
+# }

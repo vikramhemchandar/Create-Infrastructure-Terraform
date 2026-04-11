@@ -195,3 +195,4 @@ variable "create_standard_access_entries" {
 variable "bucket_name" {
   type = string
 }
+

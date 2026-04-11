@@ -101,11 +101,18 @@ resource "aws_iam_role_policy_attachment" "ebs_csi" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
 }
 
+#Creating a Namespace
+resource "kubernetes_namespace" "this" {
+  metadata {
+    name = var.namespace
+  }
+}
+
 #Kubernetes SA account creation for the pods to access S3 bucket and Secret Manager
 resource "kubernetes_service_account" "serviceaccount" {
   metadata {
     name      = var.irsa_service_account_name
-    namespace = var.namespace
+    namespace = kubernetes_namespace.this.name
     annotations = {
       "eks.amazonaws.com/role-arn" = aws_iam_role.irsa_role.arn
     }

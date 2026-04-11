@@ -61,7 +61,7 @@ module "eks-irsa" {
   irsa_role_name            = var.irsa_role_name
   namespace                 = var.namespace
   irsa_service_account_name = var.irsa_service_account_name
-  bucket_name               = var.bucket_name
+  bucket_name               = module.s3-bucket.bucket_name
   cluster_name              = module.eks-cluster.eks_cluster_name
   enable_auto_mode          = var.enable_auto_mode
 
@@ -87,6 +87,14 @@ module "eks_access_entries" {
   access_entry_policy_associations = var.access_entry_policy_associations
   node_role_arn                    = module.eks-node-group-iam-role.nodegroup_iam_arn
 }
+
+module "s3-bucket" {
+  source = "./modules/s3-bucket"
+
+  bucket_name     = var.bucket_name
+  vpc_endpoint_id = module.vpc.s3_endpoint_id
+}
+
 
 
 
