@@ -48,3 +48,13 @@ output "private_route_table_id" {
   description = "ID of the private route table"
   value       = aws_route_table.private.id
 }
+
+output "private_subnet_id2" {
+  description = "ID of the private subnet 2"
+  value       = aws_subnet.private2.id
+}
+
+output "private_route_table_id2" {
+  description = "ID of the private route table 2"
+  value       = aws_route_table.private2.id
+}

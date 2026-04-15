@@ -1,86 +1,71 @@
-# AWS Infrastructure - Terraform Project (Jhakkas)
+# AWS Infrastructure - VPC Module Deployment (Vikram)
 
-This project contains Terraform code to provision foundational AWS Infrastructure consisting of a VPC, public and private subnets, NAT Gateway, Internet Gateway, and an S3 Gateway Endpoint.
-
----
-
-## 🏗️ Root Module Configuration
-
-The root configuration acts as the entry point for the Terraform execution and sets up the providers alongside calling the underlying VPC module.
-
-### Providers & Versions (`provider.tf` & `versions.tf`)
-
-| Provider Focus | Value | Description |
-|---|---|---|
-| **Terraform Provider** | `hashicorp/aws` | The official HashiCorp AWS provider block used for resource provisioning. |
-| **Provider Version** | `6.39.0` | Exact version constraint specified in the `required_providers` block. |
-| **AWS Region** | *Dynamic* | Depends on `aws_region` fed into the profile, mapping AWS authentication constraints. |
-
-### Root Variables (`variables.tf` & `terraform.tfvars`)
-
-The infrastructure configuration relies on variables initialized natively inside `terraform.tfvars`. Below is the detailed breakdown:
-
-| Variable Name         | Type          | Current Value (`terraform.tfvars`) | Description |
-|-----------------------|---------------|------------------------------------|-------------|
-| `aws_region`          | `string`      | `"ap-south-1"`                     | Target AWS region for deployments (Mumbai). |
-| `aws_profile`         | `string`      | `"herovired"`                      | The AWS CLI profile utilized for authentication. |
-| `project_name`        | `string`      | `"jhakkas"`                        | Prefix string utilized for naming all AWS resources. |
-| `vpc_cidr`            | `string`      | `"10.0.0.0/16"`                    | IP CIDR block allocated for the entire VPC. |
-| `public_subnet_cidr`  | `string`      | `"10.0.1.0/24"`                    | Subnet CIDR block dedicated for the public subnet. |
-| `private_subnet_cidr` | `string`      | `"10.0.2.0/24"`                    | Subnet CIDR block dedicated for the private subnet. |
-| `availability_zone`   | `string`      | `"ap-south-1a"`                    | Logical Availability Zone assigned to the subnets. |
-| `common_tags`         | `map(string)` | `{ Project = "Jhakkas", Environment = "dev", ManagedBy = "Terraform", Owner = "Vikram Hem Chandar" }`     | Common tag definitions for automated management. |
+This document maps out the Terraform orchestration designed for provisioning foundational AWS Networking. The architecture yields a standard, highly available Virtual Private Cloud (VPC) featuring public/private subnet logic, resilient NAT Gateways, and isolated S3 connectivity endpoints.
 
 ---
 
-## 📦 VPC Module Details (`./modules/vpc`)
+## 🏗️ Root Execution Context
 
-A reusable module structure specifically implemented for deploying a secure and optimized standard AWS VPC pattern.
+The root `main.tf` defines the entry orchestration logic. It parses the provider block constraints and injects environment-specific bounds dynamically into the submodules.
 
-### Resources Orchestrated (`modules/vpc/main.tf`)
+### Terraform Providers
 
-| Logical Resource | Terraform AWS Provider Type | Resource Specifications / Attributes |
+| Provider Profile | Declared Version | Configuration Map |
 |---|---|---|
-| **VPC** | `aws_vpc.main` | **CIDR**: `var.vpc_cidr` <br> **DNS Support**: `true` <br> **DNS Hostnames**: `true` |
-| **Internet Gateway** | `aws_internet_gateway.igw` | **VPC ID**: Attached mapped to `aws_vpc.main.id` |
-| **Public Subnet** | `aws_subnet.public` | **CIDR**: `var.public_subnet_cidr` <br> **AZ**: `var.availability_zone` <br> **Public IP on Launch**: `true` |
-| **Private Subnet** | `aws_subnet.private` | **CIDR**: `var.private_subnet_cidr` <br> **AZ**: `var.availability_zone` |
-| **Elastic IP** | `aws_eip.nat` | **Domain**: `"vpc"`, Depends on the IGW initialization. |
-| **NAT Gateway** | `aws_nat_gateway.nat` | **Subnet ID**: Created inside the Public Subnet `aws_subnet.public.id` <br> **Allocation ID**: Attached to `aws_eip.nat.id` |
-| **Route Table (Public)** | `aws_route_table.public` | **Route Rule**: `0.0.0.0/0` -> Targets the Internet Gateway |
-| **RT Association (Public)** | `aws_route_table_association.public` | Explicitly associates Public Route Table to the Public Subnet |
-| **Route Table (Private)** | `aws_route_table.private` | **Route Rule**: `0.0.0.0/0` -> Targets outbound specifically to NAT Gateway |
-| **RT Association (Private)** | `aws_route_table_association.private` | Explicitly associates Private Route Table to the Private Subnet |
-| **VPC Endpoint (S3)** | `aws_vpc_endpoint.s3` | **Type**: `Gateway` <br> **Service Filter**: `com.amazonaws.${var.aws_region}.s3` <br> **Route Tables**: Configured automatically to *both* Public & Private Route Tables. <br> **Policy JSON**: Allows universal API actions (`s3:*`) |
+| **`hashicorp/aws`** | `6.39.0` | Assumes identity implicitly via the `aws_profile` variable definition. |
 
-### Module Variables (`modules/vpc/variables.tf`)
+### Global Input Parameters (`terraform.tfvars`)
 
-These variable declarations match the root module inputs, providing an autonomous default fallback mechanism directly at the module boundary limit:
+These bounds are injected globally from the root tracking directly into the underlying networking module:
 
-| Variable | Default Value in Module | Description |
+| Parameter Key | Data Type | Assigned Value | Target Function |
+|---|---|---|---|
+| `aws_region` | `string` | `"ap-south-1"` | AWS data center mapping (Mumbai). |
+| `aws_profile` | `string` | `"herovired"` | CLI token mapping limit identity. |
+| `project_name` | `string` | `"jhakkas"` | The naming prefix bound across all VPC module resources. |
+| `vpc_cidr` | `string` | `"10.0.0.0/16"` | Total IPv4 scope limit of the target internal cloud network. |
+| `public_subnet_cidr` | `string` | `"10.0.1.0/24"` | Network chunk sliced strictly for internet gateway routing. |
+| `private_subnet_cidr` | `string` | `"10.0.2.0/24"` | Network chunk mathematically sliced for isolated outbound-only logic. |
+| `availability_zone` | `string` | `"ap-south-1a"` | Target physical isolation data center location slice for both subsets. |
+| `common_tags` | `map(string)` | `{ Project="Jhakkas", Environment="dev", ManagedBy="Terraform", Owner="Vikram Hem Chandar" }` | Universally appended identity labels enforcing resource billing grouping. |
+
+---
+
+## 🖧 VPC Submodule Internals (`./modules/vpc`)
+
+The core module `vpc` encapsulates complex Amazon AWS explicit networking constructs logic. 
+
+### Instantiated Resources & Parameter Consumption
+
+The module consumes the parameters above directly without local duplication, leveraging them to provision the following AWS primitives natively:
+
+| Terraform AWS Resource | Resource Representation | Internal Logic & Parameter Mapping |
 |---|---|---|
-| `aws_region` | `"ap-south-1"` | AWS deployment region parameter scope. |
-| `aws_profile` | *(No default, required)* | Required AWS profile name argument. |
-| `project_name` | `"shopnow"` | Default prefix name (overwritten structurally by `jhakkas`). |
-| `vpc_cidr` | `"10.0.0.0/16"` | Default CIDR IP range limit for the module testing. |
-| `public_subnet_cidr` | `"10.0.1.0/24"` | Default structural limits for the public subnetwork block. |
-| `private_subnet_cidr` | `"10.0.2.0/24"` | Default structural limits for the private subnetwork block. |
-| `availability_zone` | `"ap-south-1a"` | Pre-computed AZ structural preference. |
-| `common_tags` | `{ Project = "ShopNow", Environment = "dev", ManagedBy = "Terraform", Owner = "Vikram" }` | Auto-defined tags payload. |
+| `aws_vpc.main` | **Virtual Private Cloud** | Instantiates basic layout bounds. consumes logically `var.vpc_cidr`. Forces `enable_dns_support` and `enable_dns_hostnames` to `true`. |
+| `aws_internet_gateway.igw` | **Internet Gateway** | Native border gateway dynamically attached into `aws_vpc.main.id`. |
+| `aws_subnet.public` | **Public Subnet** | Bounded using limit `var.public_subnet_cidr` upon `var.availability_zone`. Triggers automated mapping `map_public_ip_on_launch = true`. |
+| `aws_subnet.private` | **Private Subnet** | Bounded strictly by logic `var.private_subnet_cidr` securely upon `var.availability_zone`. |
+| `aws_eip.nat` | **NAT Elastic IP** | Static IP tracking explicitly requesting `domain = "vpc"`. Relies upon Gateway init (`depends_on`). |
+| `aws_nat_gateway.nat` | **NAT Gateway** | Translates internal traffic bounds bounds mapped precisely over `aws_subnet.public.id` bound inside `aws_eip.nat.id`. |
+| `aws_route_table.public` | **Public Route Matrix** | Implements the routing tracking explicitly routing internet `0.0.0.0/0` natively to the `aws_internet_gateway.igw.id`. |
+| `aws_route_table.private` | **Private Route Matrix** | Forces egress security routing logic pushing bounds `0.0.0.0/0` safely out via `aws_nat_gateway.nat.id`. | 
+| `aws_vpc_endpoint.s3` | **S3 Gateway Endpoint** | Deploys natively `com.amazonaws.${var.aws_region}.s3` gateway endpoint natively locking policy JSON logic to wide `s3:*` rights mapping securely spanning both Public and Private Route Maps IDs natively. |
 
-### Module Outputs (`modules/vpc/output.tf`)
+### 🚀 Exported IDs for External Module Integrations
 
-After a successful `terraform apply`, this module yields several vital identifiers usable implicitly as referential strings across wider deployment dependencies:
+A crucial element of the `vpc` submodule is rendering output dependency arrays safely so that secondary scaling modules (Compute/S3/Databases) successfully locate the correct network interfaces limits without manual hard-coding.
 
-| Output Identifier | Sourced Resource State | Output Description |
+The following unique IDs are yielded outwards dynamically mapping bounds into sibling roots logic tracks:
+
+| Generated ID Export Key | Target Mapped Value Reference | Downstream Module Use Case |
 |---|---|---|
-| `vpc_id` | `aws_vpc.main.id` | The unique ID of the compiled Virtual Private Cloud. |
-| `vpc_cidr` | `aws_vpc.main.cidr_block` | Computed explicit CIDR configuration block string. |
-| `public_subnet_id` | `aws_subnet.public.id` | Dynamic ID for configuring resources in the public topology. |
-| `private_subnet_id` | `aws_subnet.private.id` | Dynamic ID for configuring resources in the private isolation. |
-| `internet_gateway_id` | `aws_internet_gateway.igw.id` | Exposes IGW bindings logic ID index. |
-| `nat_gateway_id` | `aws_nat_gateway.nat.id` | ID allocated to NAT traffic routing rules interface. |
-| `nat_eip_public_ip` | `aws_eip.nat.public_ip` | Egress verified static IP Address allocated globally over AWS. |
-| `s3_endpoint_id` | `aws_vpc_endpoint.s3.id` | Internal regional DNS ID representing the S3 Gateway endpoint rules. |
-| `public_route_table_id` | `aws_route_table.public.id` | Represents public zone logic map IDs. |
-| `private_route_table_id` | `aws_route_table.private.id` | Represents private zone core outbound logic map IDs. |
+| `vpc_id` | `aws_vpc.main.id` | Used heavily to bound EC2 System Security Group isolation and EKS constraints. |
+| `vpc_cidr` | `aws_vpc.main.cidr_block` | Applied broadly if calculating overlapping peer matrix networks or strict IP firewalling. |
+| `public_subnet_id` | `aws_subnet.public.id` | Tracks structural placement targets mapping for DMZ applications (like EC2 bastion hosts, Load balancers). |
+| `private_subnet_id` | `aws_subnet.private.id` | Explicit boundary limits mapped internally scaling EKS Nodes scaling tracking inside the core VPC isolating bounds limit. |
+| `internet_gateway_id` | `aws_internet_gateway.igw.id` | Can be mapped mapping tracking peering gateway logic bounds bounds. |
+| `nat_gateway_id` | `aws_nat_gateway.nat.id` | Bound track mapping egress matrix logical limitations dynamically. |
+| `nat_eip_public_ip` | `aws_eip.nat.public_ip` | Required bound limits natively white-listing corporate VPNs or SAAS APIs logically tracking originating data points strictly. |
+| `s3_endpoint_id` | `aws_vpc_endpoint.s3.id` | Strictly consumed mapping bounds exclusively deployed for `modules/s3-bucket` IAM Policy logic matrices dynamically. |
+| `public_route_table_id` | `aws_route_table.public.id` | Enables secondary integrations structurally binding limits like AWS VPN peering or Transit Gateway mappings inside the public DMZ block. |
+| `private_route_table_id` | `aws_route_table.private.id` | Used actively for secondary integrations logic requiring deep isolated connectivity inside the tracking block limit bound mapping limitations. |

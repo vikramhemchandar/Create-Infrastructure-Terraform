@@ -9,6 +9,7 @@ module "vpc" {
   public_subnet_cidr  = var.public_subnet_cidr
   private_subnet_cidr = var.private_subnet_cidr
   availability_zone   = var.availability_zone
+  availability_zone2  = var.availability_zone2
 
   common_tags = var.common_tags
 }

@@ -33,10 +33,21 @@ variable "private_subnet_cidr" {
   default     = "10.0.2.0/24"
 }
 
+variable "private_subnet_cidr2" {
+  description = "CIDR block for the private subnet 2"
+  type        = string
+  default     = "10.0.3.0/24"
+}
+
 variable "availability_zone" {
   description = "Availability zone for both subnets"
   type        = string
   default     = "ap-south-1a"
+}
+
+variable "availability_zone2" {
+  description = "Availability zone-2 for 2nd private subnet"
+  type        = string
 }
 
 variable "common_tags" {
