@@ -44,7 +44,7 @@ module "eks-irsa" {
   irsa_role_name = var.irsa_role_name
   namespace = var.namespace
   service_account_name = var.service_account_name
-  bucket_name = module
+  # bucket_name = module
 }
 
 module "ec2" {
